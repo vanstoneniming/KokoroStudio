@@ -14,6 +14,26 @@
 
 英文短句、英文有声书可以用。中文有声书不要用这个包来做。
 
+## 以后再接中文（尚未实现）
+
+2026-10-16 查过，先记在这里，当前版本不改代码。
+
+中文不能靠把现有英语音色换成中文来完成。界面启动时固定调用 `build_pipeline()`，语言代码默认是 `a`（美式英语），仓库是 `hexgrad/Kokoro-82M`。中文要单独建一条管线：
+
+```python
+KPipeline(lang_code="z", repo_id="hexgrad/Kokoro-82M-v1.1-zh", device=device)
+```
+
+对应权重文件是 `kokoro-v1_1-zh.pth`。库在 `kokoro/model.py` 的 `MODEL_NAMES` 里已经登记了这个文件名。语言代码 `z` 会走 `misaki.zh.ZHG2P`。仓库名不是以 `/Kokoro-82M` 结尾，所以会使用 1.1 前端。
+
+接入时要补的内容：
+
+1. 安装 `misaki[zh]`。它依赖结巴分词、`pypinyin`、`cn2an`。2026-10-16 检查时这三项都还没装。`misaki/zh.py` 已经在包里。
+2. 侧栏增加语言切换。切到中文时重建管线，并换成中文音色列表。`tts_wrapper.py` 里现在只建一条管线。
+3. 音色只用 `zf_`（女声）和 `zm_`（男声）。官方仓库 `voices/` 下大约有 100 个，名字类似 `zf_001.pt`、`zm_009.pt`。同一仓库里还有 `af_maple`、`af_sol`、`bf_vale`，那是英语音色，不要放进中文管线。英语音色和中文音色不能在同一次合成里混合。
+4. 离线包要另放中文权重和这些音色。体积与英语模型同一量级，第一次运行也会从 Hugging Face 下载。打包脚本 `packaging/build_windows_bundle.py` 目前只收英语的 21 个音色。
+5. 中文句子里夹的英文，1.1 前端在没有 `en_callable` 时可能会丢掉。第一版按纯中文文本来做。
+
 ## 已包含的功能
 
 * 有 NVIDIA 显卡时用 CUDA 加速，没有就用 CPU。
