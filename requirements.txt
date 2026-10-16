@@ -1,0 +1,15 @@
+kokoro
+misaki
+soundfile
+huggingface-hub
+pydub
+espeakng-loader
+phonemizer-fork
+pyside6
+pyyaml
+munch
+setuptools
+librosa
+hf_xet
+EbookLib
+beautifulsoup4
